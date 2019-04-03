@@ -16,28 +16,23 @@ namespace Xam.Tests.DI
         public static object Resolve<TAService>() where TAService : class
         {
             var tupleFromContainer = container[typeof(TAService)];
-            var factory = tupleFromContainer.Item2;
-
-            if (factory == null)
-            {
-                var x = instanceCreator.CreateInstance(tupleFromContainer.Item1);
-                return x;
-            }
-            else
-            {
-              return instanceCreator.CreateInstance(factory) as TAService;                   
-            }
+            return createInstance(tupleFromContainer);
         }
 
         public static object Resolve(Type type)
         {
             var tupleFromContainer = container[type];
-            var factory = tupleFromContainer.Item2;
+            return createInstance(tupleFromContainer);
+
+        }
+
+        private static object createInstance(Tuple<Type, Func<object>> tuple)
+        {
+            var factory = tuple.Item2;
 
             if (factory == null)
             {
-                var x = instanceCreator.CreateInstance(tupleFromContainer.Item1);
-                return x;
+                return instanceCreator.CreateInstance(tuple.Item1);
             }
             else
             {

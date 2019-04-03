@@ -15,33 +15,39 @@ namespace Xam.Tests.DI.Utility
         public object CreateInstance(Type objectToCreate)
         {
             var ctrs = objectToCreate.GetConstructors();
-            if (ctrs.Length >= 1 && ctrs[0].GetParameters().Length > 0)
+            //if there are contructors
+            if (ctrs.Length >= 1)
             {
-                var x = ctrs[0].GetParameters();
-                var prms = getParameters(ctrs[0]).ToArray();
-                return Activator.CreateInstance(objectToCreate, prms);
+                var ctrParams = ctrs[0].GetParameters();
+                // if first constructor has parameters
+                if (ctrParams.Length > 0)
+                {
+                    var prms = instanceParameters(ctrParams).ToArray();
+                    return Activator.CreateInstance(objectToCreate, prms);
+                }
+                
+                // otherwise create instance with default constructor and bb
+                else return Activator.CreateInstance(objectToCreate);
             }
             else return Activator.CreateInstance(objectToCreate);
         }
-        private List<object> getParameters(ConstructorInfo ctr)
+
+        private List<object> instanceParameters(ParameterInfo[] ctrParams)
         {
             List<object> parametersToPass = new List<object>();
-            foreach (var param in ctr.GetParameters())
+            foreach (var param in ctrParams)
             {
-                Type paramType2 = param.ParameterType;
-
-                var paramType3 = param.ParameterType.GetType();
-                if (paramType2 is object)
+                var paramType = param.ParameterType;
+                
+                if (paramType is object)
                 {
-                    if (CustomDependencyServiceExtended.container.ContainsKey(paramType2))
+                    if (CustomDependencyServiceExtended.container.ContainsKey(paramType))
                     { 
-                        parametersToPass.Add(CustomDependencyServiceExtended.Resolve(paramType2));
+                        parametersToPass.Add(CustomDependencyServiceExtended.Resolve(paramType));
                     }
-                }
-               
+                }  
             }
             return parametersToPass;
         }
-
     }
 }
